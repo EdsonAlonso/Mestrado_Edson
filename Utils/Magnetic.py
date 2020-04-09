@@ -1,4 +1,5 @@
 import numpy as np
+from Utils.Spherical import R_matrix, rij_vector
 
 def magnetic_moment( theta, phi, intensity, declination, inclination ):
     """
