@@ -1,5 +1,5 @@
 import numpy as np
-from Utils import magnetic_moment
+from Utils import magnetic_moment, Carterian2Spherical, Spherical2Cartesian
 
 class Dipole:
 
@@ -10,9 +10,7 @@ class Dipole:
         self.m = None
 
     def to_cartesian( self ):
-        self.x = self.r * np.sin( self.theta ) * np.cos( self.phi )
-        self.y = self.r * np.sin( self.theta ) * np.sin( self.phi )
-        self.z = self.r * np.cos( self.phi )
+        self.x, self.y, self.z = Spherical2Cartesian( self.r, self.theta, self.phi )
 
     def from_cartesian( self, x, y, z ):
         self.x = x
@@ -20,9 +18,7 @@ class Dipole:
         self.z = z
 
     def to_spherical( self ):
-        self.r = np.sqrt( self.x**2 + self.y**2 + self.z**2 )
-        self.theta = np.arctan( np.sqrt( self.x**2 + self.y**2 )/self.z )
-        self.phi = np.arctan( self.y/self.x )
+        self.r, self.theta, self.phi = Carterian2Spherical( self.x, self.y, self.z )
 
     def magnetic_moment( self, intensity, declination, inclination ):
         self.m = magnetic_moment( self.theta, self.phi, intensity, declination, inclination )
