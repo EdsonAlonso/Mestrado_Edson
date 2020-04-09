@@ -1,5 +1,5 @@
-import numpy as np
-from Utils import magnetic_moment, Carterian2Spherical, Spherical2Cartesian
+from Utils.Conversions import Spherical2Cartesian, Carterian2Spherical
+from Utils.Magnetic import magnetic_moment
 
 class Dipole:
 

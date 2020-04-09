@@ -1,5 +1,6 @@
 import numpy as np
-from Utils import unit_spherical_vectors, rij_vector, magnetic_moment, H_matrix
+from Utils.Spherical import unit_spherical_vectors, rij_vector
+from Utils.Magnetic import magnetic_moment, H_matrix
 
 #TODO: O DIPOLO DEVE SER UM OOBJETO. AS FUNCOES DEVEM ESTAR ORIENTADAS A ELE
 
