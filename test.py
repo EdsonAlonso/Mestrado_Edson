@@ -6,7 +6,26 @@ def test_one( ):
     Esta funcao deve fazer o primeiro teste, i.e., o teste em que a coolatitude do observador eh a mesma do dipolo.
 
     """
-    pass
+    #dipolo
+    rj, theta_j, phi_j = 0, 0, 0
+    incl, dec = 0,0
+    #obs1
+    r1, theta_1, phi_1 = 1, 90, 90
+
+    #obs2
+    r2, theta_2, phi_2 = 2, 90, 270
+
+    dip_pos = [rj, theta_j, phi_j]
+
+    obs1_pos = [r1, theta_1, phi_1]
+    obs2_pos = [r2, theta_2, phi_2]
+    obs = [obs1_pos, obs2_pos]
+
+    A = AnomalyDipole.Anomaly_Field(dip_pos, incl, dec, obs, mode = 'degree')
+
+    assert abs( A[0][0] - A[1][0] ) < 1e-7
+    assert abs( A[0][1] - A[1][1] ) < 1e-7
+    assert abs( A[0][2] - A[1][2] ) < 1e-7
 
 
 def test_two( ):
@@ -15,18 +34,20 @@ def test_two( ):
     """
     eps = 1E-3
 
-    ri, theta_i, phi_i = 2, 0, np.pi / 2
-    rj, theta_j, phi_j = -5, np.pi/4, np.pi/2
-    incl, decl = np.pi, np.pi/6
+    dipole = [ 1, 45, 90 ]
+    inc, dec = -45, -45
 
-    dip_pos = [ rj, theta_j, phi_j ]
-    obs_pos = [ ri, theta_i, phi_i ]
+    observers_theta = 45
+    observers_phi = 0
 
-    A = AnomalyDipole.Anomaly_Field( dip_pos, incl, decl, obs_pos )
+    nobs = 1000
+    observers = [ ]
+    for i in range( nobs ):
+        observers.append( [ 2+i , observers_theta, observers_phi ] )
 
-#TODO: FAZER A FUNCAO QUE CALCULA A PELO METODO DE -GRAD(PSI)
-    assert np.linalg.norm( A - A ) < eps
+    A1r = AnomalyDipole.Anomaly_Field( dipole, inc, dec, observers, mode = 'degree' )[:,0]
+    A2r = AnomalyDipole.Anomaly_Field2( dipole, inc, dec, observers, mode = 'degree' )
 
-
+    assert abs( A1r - A2r ) < eps
 
 

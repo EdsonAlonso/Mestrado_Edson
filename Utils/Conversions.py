@@ -3,7 +3,7 @@ import numpy as np
 def Carterian2Spherical(r, theta, phi):
     """
     Docstring:
-    Converts cartesian to spherical coordinates.
+    Converts geocentric cartesian to spherical coordinates.
 
     :param r: float
             R-axis value
@@ -31,7 +31,7 @@ def Carterian2Spherical(r, theta, phi):
 def Spherical2Cartesian(x, y, z):
     """
     Docstring:
-    Converts spherical to cartesian coordinates.
+    Converts spherical to geocentric cartesian coordinates.
 
     :param x: float
         X-axis value.
