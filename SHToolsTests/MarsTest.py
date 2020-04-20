@@ -77,16 +77,14 @@ def plot_mag( data, title, label ):
 
     plt.savefig(save_title+'.png', dpi = 300, bbox_inches = 'tight')
 
-#plot_mag( total_mag.data, 'Campo Total', '|B| (nT)' )
-
-# mag_radial = mag.rad
-# mag_theta = mag.theta
-# mag_phi = mag.phi
+mag_radial = mag.rad
+mag_theta = mag.theta
+mag_phi = mag.phi
 potential_mag = mag.pot
 
-# plot_mag( total_mag.data, 'Campo Total', '|B| (nT)' )
-# plot_mag( mag_radial.data, 'Componente Radial', '|$B_r$| (nT)' )
-# plot_mag( mag_theta.data, 'Componente Theta', '|$B_\Theta$| (nT)' )
-# plot_mag( mag_phi.data, 'Componente Phi', '|$B_\phi$| (nT)' )
+plot_mag( total_mag.data, 'Campo Total', '|B| (nT)' )
+plot_mag( mag_radial.data, 'Componente Radial', '|$B_r$| (nT)' )
+plot_mag( mag_theta.data, 'Componente Theta', '|$B_\Theta$| (nT)' )
+plot_mag( mag_phi.data, 'Componente Phi', '|$B_\phi$| (nT)' )
 plot_mag( potential_mag.data, 'Potencial', ' ' )
 
