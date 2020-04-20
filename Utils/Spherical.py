@@ -48,8 +48,6 @@ def inverse_distance_function( ri, rj, mode = 'radians' ):
     :param mode: string
         String meaning the unit system used for the angles, i.e., degrees or radians.
     :return:
-
-
     """
 
     muij = np.dot( unit_spherical_vectors( ri[ 1 ], ri[ 2 ], mode=mode)['r'], unit_spherical_vectors( rj[ 1 ], rj[ 2 ], mode=mode)['r']  )

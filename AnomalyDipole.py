@@ -103,9 +103,10 @@ if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
 
-    plt.figure( figsize = ( 10,10 ) )
-    plt.plot( np.arange( len(A1[:,0] ) ), A1[:,0], 'r')
-    plt.plot( np.arange( 10,len(A2r )+10 ) , A2r, 'g' )
+    # plt.figure( figsize = ( 10,10 ) )
+    # plt.plot( np.arange( len(A1[:,0] ) ), A1[:,0], 'r')
+    # plt.plot( np.arange( 10,len(A2r )+10 ) , A2r, 'g' )
+    plt.plot( A1[:,0], A2r, 'g' )
     plt.show( )
 
     # ri, theta_i , phi_i = 700, 90, 45
