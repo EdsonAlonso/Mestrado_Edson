@@ -48,6 +48,27 @@ def test_two( ):
     A1r = AnomalyDipole.Anomaly_Field( dipole, inc, dec, observers, mode = 'degree' )[:,0]
     A2r = AnomalyDipole.Anomaly_Field2( dipole, inc, dec, observers, mode = 'degree' )
 
-    assert abs( A1r - A2r ) < eps
+    np.testing.assert_almost_equal( A1r, A2r )
 
 
+def test_three( ):
+    """
+    Esta funcao deve fazer o terceiro teste.
+    """
+    eps = 1E-3
+
+    dipole = [ 6371, 90, 0 ]
+    inc, dec = -90, 90
+
+    observer1_theta = 91
+
+    observer2_theta = 89
+
+    observers_phi = 0
+
+    observers = [ [ 6371, observer1_theta, observers_phi ], [ 6371, observer2_theta, observers_phi ] ]
+
+    A = AnomalyDipole.Anomaly_Field( dipole, inc, dec, observers, mode = 'degree' )
+
+
+    np.testing.assert_almost_equal( A[0][0], A[1][0] )
