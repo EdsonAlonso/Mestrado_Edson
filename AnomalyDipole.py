@@ -79,7 +79,15 @@ def Anomaly_Field2( dipole_pos, inclination, declination, observers_pos, h = 0.0
 
     m_front = magnetic_potential(dipole_pos, inclination, declination, obs_front, mode = mode )
 
-    A = np.array( ( -m_behind + m_front )/h )
+    if index == 0:
+        factor = 1
+    elif index == 1:
+        factor = 1/( np.array( observers_pos )[:,0] )
+    elif index == 2:
+        factor = ( np.array( observers_pos )[:,0] )*( np.sin( np.array( observers_pos )[:,1] ) )
+        factor = 1/factor
+
+    A = factor*np.array( ( -m_behind + m_front )/h )
 
     return -A
 
@@ -98,8 +106,8 @@ if __name__ == "__main__":
     for i in range( nobs ):
         observers.append( [ 2+i , observers_theta, observers_phi ] )
 
-    A1 = 1e20*Anomaly_Field( dipole, inc, dec, observers, mode = 'degree' )
-    A2r = 1e20*Anomaly_Field2( dipole, inc, dec, observers, mode = 'degree' )
+    A1 = Anomaly_Field( dipole, inc, dec, observers, mode = 'degree' )
+    A2r = Anomaly_Field2( dipole, inc, dec, observers, mode = 'degree', index=0)
 
     import matplotlib.pyplot as plt
 
@@ -107,6 +115,7 @@ if __name__ == "__main__":
     # plt.plot( np.arange( len(A1[:,0] ) ), A1[:,0], 'r')
     # plt.plot( np.arange( 10,len(A2r )+10 ) , A2r, 'g' )
     plt.plot( A1[:,0], A2r, 'g' )
+    plt.grid( )
     plt.show( )
 
     # ri, theta_i , phi_i = 700, 90, 45
