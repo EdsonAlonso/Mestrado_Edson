@@ -1,0 +1,44 @@
+import pyshtools as pysh
+from pyshtools import constant
+
+
+def FromCoeffFile( coeff_file, Type = 'total' ):
+
+    """
+    Function that calculates the Magnetic Field, one of its components, or Potential Magnetic Field, from a
+    gauss-coefficients file. This function uses SHTools for python.
+
+    :param coeff_file: str
+        Name of the coefficients file.
+    :param Type: str
+        Can be any of the following values: total, radial, theta, phi, pot, all
+        Return either the total magnetic field, one of its components or the potential field. If Type is all, returns
+        all of the above types as a python dictionary.
+
+    :return:Array_like or dict
+        The Type chosen by the user.
+    """
+
+    clm = pysh.SHMagCoeffs.from_file(coeff_file)
+    a = constant.a_mars.value
+    f = constant.f_mars.value
+
+    try:
+        mag = clm.expand(a=a, f=f)
+    except Exception as e:
+        print(e)
+
+    d = { }
+    d['total'] = mag.total.data
+    d['radial'] = mag.rad.data
+    d['theta'] = mag.theta.data
+    d['phi'] = mag.phi.data
+    d['pot'] = mag.pot.data
+
+    if Type == 'all':
+        return d
+
+    return d[Type]
+
+
+
