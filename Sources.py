@@ -1,6 +1,6 @@
-from Utils.Conversions import Spherical2Cartesian, Carterian2Spherical
-from Utils.Magnetic import magnetic_moment
-from Utils.Spherical import unit_spherical_vectors
+from Mestrado.Utils.Conversions import Spherical2Cartesian, Carterian2Spherical
+from Mestrado.Utils.Magnetic import magnetic_moment
+from Mestrado.Utils.Spherical import unit_spherical_vectors
 
 class Dipole:
 

@@ -35,7 +35,7 @@ def magnetic_moment( theta, phi, intensity, declination, inclination, mode = 'ra
 
     magnetic_vector = intensity*np.dot( R, np.array( m ) )
 
-    return magnetic_vector
+    return m
 
 def H_matrix( ri, rj, vi, vj ):
     """

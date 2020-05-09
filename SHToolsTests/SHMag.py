@@ -2,7 +2,7 @@ import pyshtools as pysh
 from pyshtools import constant
 
 
-def FromCoeffFile( coeff_file, Type = 'total' ):
+def FromCoeffFile( coeff_file, Type = 'total', h = 0 ):
 
     """
     Function that calculates the Magnetic Field, one of its components, or Potential Magnetic Field, from a
@@ -15,16 +15,25 @@ def FromCoeffFile( coeff_file, Type = 'total' ):
         Return either the total magnetic field, one of its components or the potential field. If Type is all, returns
         all of the above types as a python dictionary.
 
+    :param h: float
+        Height to be added to the reference ellipsoid, in Km
+
+
     :return:Array_like or dict
         The Type chosen by the user.
     """
 
     clm = pysh.SHMagCoeffs.from_file(coeff_file)
-    a = constant.a_mars.value
-    f = constant.f_mars.value
+    clm.info( )
+
+    a = clm.__dict__['r0']
+    #a = constant.a_mars.value
+    print( f'a: {a}' )
+    h *= 1000
+    print( f'h: {h}')
 
     try:
-        mag = clm.expand(a=a, f=f)
+        mag = clm.expand( a = a + h, f = 0 )
     except Exception as e:
         print(e)
 

@@ -24,7 +24,7 @@ def PlotMag( data, title, label, show = False, save = True ):
 
     plt.figure()
     plt.title(title, fontsize=20)
-    plt.contourf( data, 500, cmap=mycmap)
+    plt.contourf( data, 50, cmap=mycmap)
     plt.xticks(np.arange(0, nlongs, nlongs // 12), labels=np.arange(0, 361, 30))
     plt.yticks(np.arange(0, nlats, nlats // 6), labels=np.arange(-90, 91, 30)[::-1])
     plt.gca().invert_yaxis()
