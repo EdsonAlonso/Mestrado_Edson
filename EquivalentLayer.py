@@ -2,8 +2,12 @@ import numpy as np
 from Mestrado.Sources import Dipole
 from Mestrado.Layer import Layer
 
+#TODO: SPHERICAL its a children of Dipole, so must have a hidden(?) method _add_dipole to add a dipole into the grid\
+#the methods to add an array of dipoles, should call this hidden method
 
-class EqLayer( Layer, Dipole ):
+#TODO: Add a function that plots the dipoles (shoul be inherited and modified from Dipole class)
+
+class Spherical( Layer, Dipole ):
 
     def __init__( self, radius, n_theta, n_phi ):
         Layer.__init__( Layer, n_theta, n_phi)
