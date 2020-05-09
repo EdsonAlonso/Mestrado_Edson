@@ -1,27 +1,127 @@
-from Mestrado.Utils.Conversions import Spherical2Cartesian, Carterian2Spherical
-from Mestrado.Utils.Magnetic import magnetic_moment
-from Mestrado.Utils.Spherical import unit_spherical_vectors
+import numpy as np
+from Mestrado.Utils.Spherical import distance
+from Mestrado.Utils.Mag import magnetization, delta_mag
 
-class Dipole:
 
-    def __init__( self, r = None, theta = None, phi = None, mode = 'radians' ):
-        self.r = r
+class Dipole(object):
+
+    def __init__( self, radius, theta, phi, inclination, declination, intensity ):
+        self.radius = radius
         self.theta = theta
         self.phi = phi
-        self.m = None
-        self.uvectors = unit_spherical_vectors( self.theta, self.phi, mode = mode )
+        self.declination = declination
+        self.inclination = inclination
+        self.intensity = intensity
+        self._R, self._A, self._B, self._C, self._D, self._E, self._F, self._G, self._A1, self._B1, self._C1 = [None]*11
+        self.pos = np.array( [ self.radius, self.theta, self.phi ] )
+        self.observers = None
 
-    def to_cartesian( self ):
-        self.x, self.y, self.z = Spherical2Cartesian( self.r, self.theta, self.phi )
 
-    def from_cartesian( self, x, y, z ):
-        self.x = x
-        self.y = y
-        self.z = z
+    def _define_observers( self, observers ):
+        if type( observers ) == np.ndarray:
+            self.observers = observers
+        else:
+            self.observers = np.array( observers )
 
-    def to_spherical( self ):
-        self.r, self.theta, self.phi = Carterian2Spherical( self.x, self.y, self.z )
 
-    def magnetic_moment( self, intensity, declination, inclination ):
-        self.m = magnetic_moment( self.theta, self.phi, intensity, declination, inclination )
-        return self.m
+    def r_component( self, observers = None ):
+
+        mr, mtheta, mphi = magnetization( self.intensity, self.inclination, self.declination )
+        if self.observers is None:
+            self._define_observers( observers )
+
+        r, theta, phi = self.observers[:, 0], self.observers[:, 1], self.observers[:, 2]
+
+        cos_delta = delta_mag( self.observers, self.pos )
+
+        if self._A is None:
+            self._A = r - self.radius * cos_delta
+        if self._R is None:
+            self._R = distance(self.observers, self.pos)
+        if self._A1 is None:
+            self._A1 = self.radius - r * cos_delta
+        if self._B1 is None:
+            self._B1 = r * (np.cos(theta) * np.sin(self.theta) - np.cos(self.theta) * np.sin(theta) * np.cos(phi - self.phi))
+        if self._C1 is None:
+            self._C1 = -r * np.sin(theta) * np.sin(phi - self.phi)
+
+        factor1 = (-1 / self._R ** 3)
+        factor_r = (3 * self._A * self._A1 / self._R ** 2 + cos_delta)
+        factor_theta = (3 * self._A * self._B1 / self._R ** 2 - self._B1 / r)
+        factor_phi = (3 * self._A * self._C1 / self._R ** 2 - self._C1 / r)
+
+        self.Br = factor1 * (factor_r * mr + factor_theta * mtheta + factor_phi * mphi)
+
+        return self.Br
+
+    def theta_component( self, observers = None ):
+
+        mr, mtheta, mphi = magnetization( self.intensity, self.inclination, self.declination )
+
+        if self.observers is None:
+            self._define_observers( observers )
+
+        r, theta, phi = self.observers[:, 0], self.observers[:, 1], self.observers[:, 2]
+
+        cos_delta = delta_mag( self.observers, self.pos )
+
+        if self._B is None:
+            self._B = self.radius * (np.sin(theta) * np.cos(self.theta) - np.cos(theta) * np.sin(self.theta) * np.cos(phi - self.phi))
+        if self._R is None:
+            self._R = distance(self.observers, self.pos)
+        if self._A1 is None:
+            self._A1 = self.radius - r * cos_delta
+        if self._B1 is None:
+            self._B1 = r * (np.cos(theta) * np.sin(self.theta) - np.cos(self.theta) * np.sin(theta) * np.cos(phi - self.phi))
+        if self._C1 is None:
+            self._C1 = -r * np.sin(theta) * np.sin(phi - self.phi)
+        if self._D is None:
+            self._D = np.sin(theta) * np.sin(self.theta) + np.cos(theta) * np.cos(self.theta) * np.cos(phi - self.phi)
+        if self._E is None:
+            self._E = np.cos(theta) * np.sin(phi - self.phi)
+
+        factor1 = (-1 / self._R ** 3)
+        factor_r = (3 * self._B * self._A1 / self._R ** 2 - self._B / self.radius)
+        factor_theta = (3 * self._B * self._B1 / self._R ** 2 + self._D)
+        factor_phi = (3 * self._B * self._C1 / self._R ** 2 + self._E)
+
+        self.Btheta = factor1 * (factor_r * mr + factor_theta * mtheta + factor_phi * mphi)
+
+        return self.Btheta
+
+    def phi_component( self, observers = None ):
+
+        mr, mtheta, mphi = magnetization( self.intensity, self.inclination, self.declination )
+
+
+        if self.observers is None:
+            self._define_observers( observers )
+
+        r, theta, phi = self.observers[:, 0], self.observers[:, 1], self.observers[:, 2]
+
+        cos_delta = delta_mag( self.observers, self.pos )
+
+        if self._C is None:
+            self._C = self.radius * np.sin(self.theta) * np.sin(phi - self.phi)
+        if self._R is None:
+            self._R = distance(self.observers, self.pos)
+        if self._A1 is None:
+            self._A1 = self.radius - r * cos_delta
+        if self._B1 is None:
+            self._B1 = r * (np.cos(theta) * np.sin(self.theta) - np.cos(self.theta) * np.sin(theta) * np.cos(phi - self.phi))
+        if self._C1 is None:
+            self._C1 = -r * np.sin(theta) * np.sin(phi - self.phi)
+        if self._F is None:
+            self._F = np.cos(self.theta) * np.sin(phi - self.phi)
+        if self._G is None:
+            self._G = np.cos(phi - self.phi)
+
+        factor1 = (-1 / self._R ** 3)
+        factor_r = (3 * self._C * self._A1 / self._R ** 2 - self._C / self.radius)
+        factor_theta = (3 * self._C * self._B1 / self._R ** 2 - self._F)
+        factor_phi = (3 * self._C * self._C1 / self._R ** 2 + self._G)
+
+        self.Bphi = factor1 * (factor_r * mr + factor_theta * mtheta + factor_phi * mphi)
+
+        return self.Bphi
+
