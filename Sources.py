@@ -4,7 +4,7 @@ from Mestrado.Utils.Mag import magnetization, delta_mag
 
 #TODO: Think of a method to better check if A,B,C,...etc. have been already calculated
 #TODO: Create a Method do plot the dipole, and return the figure to be able to add another dipole in the plot.
-
+#TODO: Maybe refactor this
 class Dipole(object):
 
     def __init__( self, radius, theta, phi, inclination, declination, intensity ):
