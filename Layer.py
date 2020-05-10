@@ -1,4 +1,5 @@
 import numpy as np
+from Mestrado.Plots import plot_meshgrid
 
 class Layer(object):
 
@@ -18,5 +19,12 @@ class Layer(object):
     def random_layer( self ):
         pass
 
-    def defined_layer(self):
-        pass
+    def defined_layer(self, x, y ):
+        self.gridx, self.gridy = np.meshgrid( x,y )
+        return self.gridx, self.gridy
+
+    def show(self, xlims = None, ylims = None, show = True):
+        self.figure, self.axis = plot_meshgrid([self.gridx, self.gridy], xlims, ylims,  show = show)
+
+        return self.figure, self.axis
+
