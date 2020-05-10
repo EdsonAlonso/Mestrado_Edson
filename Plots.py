@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 mycmap = scm.diverging.Vik_20.mpl_colormap
 
-def PlotMag( data, title, label, show = False, save = True ):
+def plot_mag( data, title, label, show = False, save = True ):
     """
     Plot a Magnetic data on a rectangular latitude x longitude grid.
 
@@ -25,8 +25,8 @@ def PlotMag( data, title, label, show = False, save = True ):
     plt.figure()
     plt.title(title, fontsize=20)
     plt.contourf( data, 50, cmap=mycmap)
-    plt.xticks(np.arange(0, nlongs, nlongs // 12), labels=np.arange(0, 361, 30))
-    plt.yticks(np.arange(0, nlats, nlats // 6), labels=np.arange(-90, 91, 30)[::-1])
+    plt.xticks(np.arange(0, nlongs, nlongs // 12), labels=np.arange(-180, 180, 30))
+    plt.yticks(np.arange(0, nlats, nlats // 6), labels=np.arange(0, 181, 30)[::-1])
     plt.gca().invert_yaxis()
     plt.colorbar(label=label)
     plt.xlabel('Longitude (°)', fontsize=20)
@@ -42,3 +42,29 @@ def PlotMag( data, title, label, show = False, save = True ):
         plt.savefig(save_title+'.png', dpi = 300, bbox_inches = 'tight')
     if show == True:
         plt.show( )
+
+def plot_meshgrid( meshgrid, xlims = None, ylims = None, show = True):
+    gridx, gridy = meshgrid[ 0 ], meshgrid[ 1 ]
+    figure, axis = plt.subplots()
+
+    if xlims == None:
+        axis.vlines(gridx[0], min(gridy[:, 0]) - abs(min(gridy[:, 0])) / 5,
+                    max(gridy[:, 0]) + abs(max(gridy[:, 0])) / 5, colors='r')
+        axis.set_xlim(min(gridx[0]) - abs(min(gridx[0]))/10, max(gridx[0]) + abs(max(gridx[0]))/10 )
+    else:
+        axis.vlines(gridx[0], min(ylims), max(ylims), colors='r')
+        axis.set_xlim( min( xlims ), max( xlims ) )
+
+    if ylims == None:
+        axis.hlines(gridy[:, 0], min(gridx[0]) - abs(min(gridx[0])) / 5,
+                    max(gridx[0]) + abs(max(gridx[0])) / 5, colors='r')
+        axis.set_ylim(min(gridy[:, 0]) - abs(min(gridy[:, 0])) / 10, max(gridy[:, 0]) + abs(max(gridy[:, 0])) / 10)
+    else:
+        axis.hlines(gridy[:,0],min(xlims), max(xlims), colors='r')
+        axis.set_ylim( min( ylims ), max( ylims ) )
+
+    if show == True:
+        plt.show()
+    return figure, axis
+
+
