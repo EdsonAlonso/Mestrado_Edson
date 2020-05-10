@@ -1,9 +1,9 @@
 import numpy as np
 from Mestrado.Utils.Spherical import distance
 from Mestrado.Utils.Mag import magnetization, delta_mag
+import matplotlib.pyplot as plt
 
 #TODO: Think of a method to better check if A,B,C,...etc. have been already calculated
-#TODO: Create a Method do plot the dipole, and return the figure to be able to add another dipole in the plot.
 #TODO: Maybe refactor this
 class Dipole(object):
 
@@ -27,7 +27,6 @@ class Dipole(object):
 
 
     def r_component( self, observers = None ):
-
         mr, mtheta, mphi = magnetization( self.intensity, self.inclination, self.declination )
         if self.observers is None:
             self._define_observers( observers )
@@ -53,8 +52,7 @@ class Dipole(object):
         factor_phi = (3 * self._A * self._C1 / self._R ** 2 - self._C1 / r)
 
         self.Br = factor1 * (factor_r * mr + factor_theta * mtheta + factor_phi * mphi)
-
-        return self.Br
+        return np.array( self.Br )
 
     def theta_component( self, observers = None ):
 
@@ -127,3 +125,43 @@ class Dipole(object):
 
         return self.Bphi
 
+
+    def show( self, figure = None, axis = None ):
+        if figure or axis:
+            self.figure = figure
+            self.axis = axis
+
+            self.axis.scatter( self.theta, self.phi, marker = 'D', s = 40, color = 'blue' )
+            plt.show( )
+        else:
+            self.figure = plt.figure()
+            self.axis = self.figure.subplots( )
+            self.axis.scatter( self.theta, self.phi, marker = 'D', s = 40, color = 'blue' )
+            plt.show( )
+
+        return self.figure, self.axis
+
+
+if __name__ == "__main__":
+    d = Dipole( 6371, np.radians(90), np.radians(0),np.radians(90), np.radians(0), 1 )
+
+    h = 5
+    nobs = 50
+    obs_theta = np.linspace(np.radians(0), np.radians(180), nobs)
+    obs_phi = np.linspace(np.radians(-180), np.radians(180), nobs)
+    observers = []
+    for i in range(nobs):
+        for j in range(nobs):
+            observers.append([6371 + h * 1000, obs_theta[i], obs_phi[j]])
+
+    d._define_observers( observers )
+    from time import time
+    t1 = time( )
+    B_r = d.r_component( )
+    B_theta = d.theta_component( )
+    B_phi = d.phi_component( )
+
+    print( time( ) - t1 )
+
+    from Mestrado.Plots import plot_mag
+    plot_mag( np.reshape( B_r , (nobs,nobs) ), 'Campo Total', 'B', show = True, save = False )

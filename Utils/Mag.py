@@ -2,7 +2,6 @@
 import numpy as np
 
 def delta_mag( observer, source ):
-
     if len( np.shape( observer ) ) > 1:
         theta, phi = observer[ :,1 ], observer[ :,2 ]
     else:
