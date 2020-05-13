@@ -1,6 +1,8 @@
 from palettable import scientific as scm
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 
 mycmap = scm.diverging.Vik_20.mpl_colormap
 
@@ -66,5 +68,17 @@ def plot_meshgrid( meshgrid, xlims = None, ylims = None, show = True):
     if show == True:
         plt.show()
     return figure, axis
+
+
+def scatter_3d( x, y, z, show = True ):
+
+    figure = plt.figure( )
+    axis = figure.add_subplot( 111, projection = '3d' )
+    axis.scatter( x, y, z, marker = 'D', c = 'b' )
+    if show == True:
+        plt.show( )
+
+    return figure, axis
+
 
 
