@@ -1,127 +1,139 @@
 import numpy as np
 from Mestrado.Sources import Dipole
 from Mestrado.Layer import Layer
-from time import time
-import matplotlib.pyplot as plt
-from Mestrado.Plots import plot_mag
-from datetime import datetime
+from Mestrado.Utils.Auxiliaries import generate_random
 
 
-#TODO: Refactor. This class is to big. Maybe a factory to return the components in just 1 function. Or maybe just one
-#function to return all the components and, maybe, the potential(I dont think Im gonna use it).
-
-class Spherical( Layer, Dipole ):
+class Spherical( Layer ):
 
     def __init__( self, radius, n_phi, n_theta ):
         Layer.__init__( Layer, n_phi, n_theta)
         self.radius = radius
-        self.property = None
-        self.n_theta = self.ny
-        self.n_phi = self.nx
         self.dipoles = [ ]
-        self.observers = None
-        self.B_r = 0
-        self.B_theta = 0
-        self.B_phi = 0
-        self.theta = None
-        self.phi = None
-
+        self.intialize( )
 
     def _add_dipole_from_class( self, dipole ):
         self.dipoles.append( dipole )
 
-    def _add_dipole_from_properties( self, radius, theta, phi, inclination, declination, intensity ):
-        d = Dipole( radius, theta, phi, inclination, declination, intensity )
+    def _add_dipole_from_properties( self, theta, phi, inclination, declination ):
+        d = Dipole( self.radius, theta, phi, inclination, declination, 1 )
         self.dipoles.append( d )
 
-
-    def from_array( self, magnetic_intensity, inclination, declination ):
-        self.inclination, self.declination = inclination, declination
-        self.phi, self.theta = self.regular_layer( np.radians( -180 ), np.radians( 180 ), np.radians( 0 ), np.radians( 180 ) )
-        #print(np.rad2deg(self.phi))
-        for i in range( self.n_theta ):
-            for j in range( self.n_phi ):
-                self._add_dipole_from_properties( self.radius, self.theta[i][j], self.phi[i][j],inclination, declination,
-                                                  magnetic_intensity[ j ][ i ] )
-
-        self.property = np.reshape( magnetic_intensity, (np.shape( self.theta ) ) )
-
-    def from_random( self, inclination, declination ):
-        self.inclination, self.declination = inclination, declination
-        self.theta = np.empty( self.n_theta )
-        self.phi = np.empty( self.n_phi )
-
-        self.property = np.random.uniform( low = 1, high = 1.5, size = (self.n_phi, self.n_theta ) )
-
-        for i in range( self.nx ):
-            phi = np.random.choice(np.linspace(np.radians(-180), np.radians(180), 200))
-            self.phi[i] = phi
-            for j in range( self.ny ):
-                theta = np.random.choice(np.linspace(np.radians(0), np.radians(180), 200))
-                self.theta[j] = theta
-                self._add_dipole_from_properties( self.radius, theta, phi,inclination, declination,
-                                                  self.property[ i ][ j ] )
-
-        self.phi, self.theta = self.defined_layer( self.phi, self.theta )
-
-    def from_positions( self, theta, phi, intensity, inclination, declination ):
-        self.inclination, self.declination = inclination, declination
-
-        variables = [ theta, phi, intensity ]
-
-        for i in range( len( variables ) ):
-            if not isinstance( variables[ i ], (list, tuple, np.ndarray ) ):
-                variables[ i ] = np.array( [ variables[ i ] ] )
-
-        self.theta = variables[ 0 ]
-        self.phi = variables[ 1 ]
-        self.property = variables[ 2 ]
-
-        for i in range( len( self.theta ) ):
-            for j in range( len( self.phi ) ):
-                self._add_dipole_from_properties( self.radius, self.theta[ i ], self.phi[ j ],
-                                                  self.inclination, self.declination,
-                                                  self.property[ i + j ] )
-
-
-    def r_component( self, observers = None ):
-        if self.observers is None:
-            self.observers = observers
+    def __create_B_matrix( self, observers ):
+        Br_layer = []
+        Btheta_layer = []
+        Bphi_layer = []
         for dipole in self.dipoles:
-            # print( np.rad2deg( dipole.theta ), np.rad2deg( dipole.phi ) )
+            Br_layer.append( dipole.r_component( observers ) )
+            Btheta_layer.append( dipole.theta_component( observers ) )
+            Bphi_layer.append( dipole.phi_component( observers ) )
+
+        return np.c_[ Br_layer, Btheta_layer, Bphi_layer ].T
+
+    def intialize( self ):
+        self.phi, self.theta = self.regular_layer( -np.pi, np.pi, 0, np.pi )
+        self.inclination = generate_random( 0, np.pi, ( self.nx, self.ny ) )
+        self.declination = generate_random( 0, 2*np.pi, ( self.nx, self.ny ) )
+        for i in range( self.ny ):
+            for j in range( self.nx ):
+                self._add_dipole_from_properties( self.theta[ i ][ j ], self.phi[ i ][ j ],
+                                                  self.inclination[ j ][ i ], self.declination[ j ][ i ] )
+
+    def expand( self, observers ):
+        if not self.__fitted__:
+            return 'Need to fit the model first!!'
+        self.observers = observers
+        self.B_r, self.B_theta, self.B_phi = 0,0,0
+        for dipole in self.dipoles:
             self.B_r += dipole.r_component( self.observers )
-
-    def theta_component( self, observers = None ):
-        if self.observers is None:
-            self.observers = observers
-
-        for dipole in self.dipoles:
             self.B_theta += dipole.theta_component( self.observers )
-
-    def phi_component( self, observers = None ):
-        if self.observers is None:
-            self.observers = observers
-
-        for dipole in self.dipoles:
             self.B_phi += dipole.phi_component( self.observers )
 
-    def show_layer( self, save = False ):
-        self.gridy = np.rad2deg( self.theta )
-        self.gridx = np.rad2deg( self.phi )
-        self.figure, self.axis = self.show( xlims = [-180, 180], ylims = [0,180], show = False )
-        self.axis.invert_yaxis( )
+        return self
 
-        self.axis.scatter( np.rad2deg( self.phi ), np.rad2deg( self.theta ), marker = 'D', s = 40, color = 'blue')
-        if save == True:
-            now = datetime.now()
-            self.figure.savefig( f'Layer_{str(now)}' )
-        plt.show( )
 
-    def show_component( self, name, save = False ):
-        shape = int( np.sqrt( len( self.observers ) ) )
-        if name == 'Radial':
-            plot_mag( self.B_r.reshape( shape,shape ), 'Radial Component', 'B_r (nT)', show = True, save = save )
-        elif name == 'Theta':
-            plot_mag( self.B_theta.reshape( shape,shape ), 'Theta Component', '$B_\Theta$ (nT)', show = True, save = save )
-        elif name == 'Phi':
-            plot_mag( self.B_phi.reshape( shape,shape ), 'Phi Component', '$B_\phi$ (nT)', show = True, save = save )
+
+    def fit( self, observers, data ):
+        self.__fitted__ = True
+        A = self.__create_B_matrix( observers )
+        b = data
+        try:
+            x = np.array( np.linalg.lstsq( A, b ) )[ 0 ]
+            for index, dipole in enumerate(self.dipoles):
+                dipole.intensity *= x[index]
+        except Exception as e:
+            self.__fitted__ = False
+
+    def show(self):
+        pass
+
+
+if __name__ == '__main__':
+
+    radius = 6000
+    nphi = 30
+    ntheta = 30
+    eqly  = Spherical( 6000, 20, 30 )
+
+    h = 4
+    nobs = 50
+    obs_theta = np.linspace(np.radians(0), np.radians(180), nobs)
+    obs_phi = np.linspace(np.radians(-180), np.radians(180), nobs)
+    observers = []
+    for i in range(nobs):
+        for j in range(nobs):
+            observers.append([radius + h*1000, obs_theta[i], obs_phi[j]])
+
+    components = eqly.expand( observers )
+
+    from Mestrado.Plots import plot_mag
+
+    plot_mag( np.reshape( components.B_r , (nobs,nobs) ), 'Componente radial', 'B_r (nT)', show = True, save = False )
+
+#
+# def from_array( self, magnetic_intensity, inclination, declination ):
+#     self.inclination, self.declination = inclination, declination
+#     self.phi, self.theta = self.regular_layer( np.radians( -180 ), np.radians( 180 ), np.radians( 0 ), np.radians( 180 ) )
+#     for i in range( self.n_theta ):
+#         for j in range( self.n_phi ):
+#             self._add_dipole_from_properties( self.radius, self.theta[i][j], self.phi[i][j],inclination, declination,
+#                                               magnetic_intensity[ j ][ i ] )
+#
+#     self.property = np.reshape( magnetic_intensity, (np.shape( self.theta ) ) )
+#
+# def from_random( self, inclination, declination ):
+#     self.inclination, self.declination = inclination, declination
+#     self.theta = np.empty( self.n_theta )
+#     self.phi = np.empty( self.n_phi )
+#
+#     self.property = np.random.uniform( low = 1, high = 1.5, size = (self.n_phi, self.n_theta ) )
+#
+#     for i in range( self.nx ):
+#         phi = np.random.choice(np.linspace(np.radians(-180), np.radians(180), 200))
+#         self.phi[i] = phi
+#         for j in range( self.ny ):
+#             theta = np.random.choice(np.linspace(np.radians(0), np.radians(180), 200))
+#             self.theta[j] = theta
+#             self._add_dipole_from_properties( self.radius, theta, phi,inclination, declination,
+#                                               self.property[ i ][ j ] )
+#
+#     self.phi, self.theta = self.defined_layer( self.phi, self.theta )
+#
+# def from_positions( self, theta, phi, intensity, inclination, declination ):
+#     self.inclination, self.declination = inclination, declination
+#
+#     variables = [ theta, phi, intensity ]
+#
+#     for i in range( len( variables ) ):
+#         if not isinstance( variables[ i ], (list, tuple, np.ndarray ) ):
+#             variables[ i ] = np.array( [ variables[ i ] ] )
+#
+#     self.theta = variables[ 0 ]
+#     self.phi = variables[ 1 ]
+#     self.property = variables[ 2 ]
+#
+#     for i in range( len( self.theta ) ):
+#         for j in range( len( self.phi ) ):
+#             self._add_dipole_from_properties( self.radius, self.theta[ i ], self.phi[ j ],
+#                                               self.inclination, self.declination,
+#                                               self.property[ i + j ] )

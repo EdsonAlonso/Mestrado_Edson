@@ -28,7 +28,7 @@ def plot_mag( data, title, label, show = False, save = True ):
     plt.title(title, fontsize=20)
     plt.contourf( data, 50, cmap=mycmap)
     plt.xticks(np.arange(0, nlongs, nlongs // 12), labels=np.arange(-180, 180, 30))
-    plt.yticks(np.arange(0, nlats, nlats // 6), labels=np.arange(0, 181, 30)[::-1])
+    plt.yticks(np.arange(0, nlats, nlats // 6), labels=np.arange(0, 181, 30))
     plt.gca().invert_yaxis()
     plt.colorbar(label=label)
     plt.xlabel('Longitude (°)', fontsize=20)
@@ -81,4 +81,12 @@ def scatter_3d( x, y, z, show = True ):
     return figure, axis
 
 
-
+def plot_surface( x, y, z, show = True ):
+    fig = plt.figure()
+    ax = fig.add_subplot(1, 1, 1, projection='3d')
+    plot = ax.plot_surface(
+        x, y, z, rstride=1, cstride=1, cmap=plt.get_cmap('jet'),
+        linewidth=0, antialiased=False, alpha=0.5)
+    if show == True:
+        plt.show()
+    return fig, ax
