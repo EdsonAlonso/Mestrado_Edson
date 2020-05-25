@@ -98,6 +98,6 @@ class Single_model:
 #     body.r_component( observers )
 #     print( time() - t1 )
 #     from Mestrado.Plots import plot_mag
-# 
+#
 #     plot_mag( np.reshape( body.B_r, (nobs, nobs ) ), 'B_r', 'B_r (nT)', show = True, save = False )
 #
