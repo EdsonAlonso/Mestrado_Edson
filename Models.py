@@ -20,6 +20,13 @@ class Single_model:
         if self.ndipoles > 1000:
             self.ndipoles = 1000
 
+    def __clean_dipoles(self):
+        dipoles = [ ]
+        for dipole in self.dipoles:
+            dipoles.append( Dipole( dipole.radius, dipole.theta, dipole.phi, dipole.inclination, dipole.declination, dipole.intensity ) )
+
+        self.dipoles = dipoles
+
     def add_dipole( self, r, theta, phi, intensity , inclination = None, declination = None):
         self.__update_dipoles_number( )
         if inclination is None and declination is None:
@@ -37,7 +44,7 @@ class Single_model:
         result = { }
         self.B_r, self.B_theta, self.B_phi = 0,0,0
         for dipole in self.dipoles:
-            B_r, B_theta, B_phi = dipole.expand( observers)
+            B_r, B_theta, B_phi = dipole.expand( observers )
             self.B_r += B_r
             self.B_theta += B_theta
             self.B_phi += B_phi
@@ -45,8 +52,9 @@ class Single_model:
         result['Radial'] = self.B_r
         result['Theta'] = self.B_theta
         result['Phi'] = self.B_phi
-
+        self.__clean_dipoles()
         return result
+
     def r_component( self, observers ):
         self.B_r = 0
         for dipole in self.dipoles:
@@ -68,36 +76,41 @@ class Single_model:
         s['model'] = self
         s.close()
 
-#
+
 # if __name__ == "__main__":
-#     # model = Single_model( 6000, np.radians( 70 ) , np.radians( -40 ), 0, np.pi/4, 1  )
-#     # rad = generate_random( 5000, 6000, 100 )
-#     # theta = generate_random( np.radians( 65 ), np.radians( 75 ), 100 )
-#     # phi = generate_random( np.radians( -50 ), np.radians( -30 ), 100 )
-#     # intensities = generate_random( 1, 1, 100 )
-#     # declinations = generate_random( 0, 2*np.pi,100 )
-#     # for i in range( 100 ):
-#     #     model.add_dipole( rad[ i ], theta[ i ], phi[ i ], intensities[ i ], declination = declinations[ i ] )
-#     #
-#     # model.save('Bodies/100_dip_6000_70_40')
+#     model = Single_model( 6000, np.radians( 70 ) , np.radians( 50 ), 0, np.pi/4, 1  )
+#     rad = generate_random( 5500, 6000, 2 )
+#     theta = generate_random( np.radians( 70 ), np.radians( 70 ), 2 )
+#     phi = generate_random( np.radians( 50 ), np.radians( 50 ), 2 )
+#     intensities = generate_random( 1, 1, 2 )
+#     declinations = generate_random( 0, 2*np.pi,1 )
+#     for i in range( 2 ):
+#         model.add_dipole( rad[ i ], theta[ i ], phi[ i ], intensities[ i ], inclination=0, declination = np.pi/4 )
 #
-#     body = shelve.open('Bodies/100_dip_6000_70_40')['model']
-#
-#     h = 1
-#     nobs = 50
-#     obs_theta = np.linspace(np.radians(0), np.radians(180), nobs)
-#     obs_phi = np.linspace(np.radians(-180), np.radians(180), nobs)
-#     observers = []
-#     for i in range(nobs):
-#         for j in range(nobs):
-#             observers.append([6371 + h * 1000, obs_theta[i], obs_phi[j]])
-#
-#     from time import time
-#
-#     t1 = time()
-#     body.r_component( observers )
-#     print( time() - t1 )
-#     from Mestrado.Plots import plot_mag
-#
-#     plot_mag( np.reshape( body.B_r, (nobs, nobs ) ), 'B_r', 'B_r (nT)', show = True, save = False )
-#
+#     model.save('Bodies/2_dip_6000_70_40')
+
+    # body = shelve.open('Bodies/50_dip_6000_70_40')['model']
+    # #source_components = body.expand(observers)
+    # for d in body.dipoles:
+    #     print(d.radius)
+
+    # body = shelve.open('Bodies/100_dip_6000_70_40')['model']
+    #
+    # h = 1
+    # nobs = 50
+    # obs_theta = np.linspace(np.radians(0), np.radians(180), nobs)
+    # obs_phi = np.linspace(np.radians(-180), np.radians(180), nobs)
+    # observers = []
+    # for i in range(nobs):
+    #     for j in range(nobs):
+    #         observers.append([6371 + h * 1000, obs_theta[i], obs_phi[j]])
+    #
+    # from time import time
+    #
+    # t1 = time()
+    # body.r_component( observers )
+    # print( time() - t1 )
+    # from Mestrado.Plots import plot_mag
+    #
+    # plot_mag( np.reshape( body.B_r, (nobs, nobs ) ), 'B_r', 'B_r (nT)', show = True, save = False )
+
