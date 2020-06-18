@@ -77,17 +77,18 @@ class Single_model:
         s.close()
 
 
-# if __name__ == "__main__":
-#     model = Single_model( 6000, np.radians( 70 ) , np.radians( 50 ), 0, np.pi/4, 1  )
-#     rad = generate_random( 5500, 6000, 2 )
-#     theta = generate_random( np.radians( 70 ), np.radians( 70 ), 2 )
-#     phi = generate_random( np.radians( 50 ), np.radians( 50 ), 2 )
-#     intensities = generate_random( 1, 1, 2 )
-#     declinations = generate_random( 0, 2*np.pi,1 )
-#     for i in range( 2 ):
-#         model.add_dipole( rad[ i ], theta[ i ], phi[ i ], intensities[ i ], inclination=0, declination = np.pi/4 )
-#
-#     model.save('Bodies/2_dip_6000_70_40')
+if __name__ == "__main__":
+    ndip = 50
+    model = Single_model( 6000, np.radians( 70 ) , np.radians( 50 ), 0, np.pi/4, 2e10  )
+    rad = generate_random( 5500, 6000, ndip )
+    theta = generate_random( np.radians( 70 ), np.radians( 70 ), ndip )
+    phi = generate_random( np.radians( 50 ), np.radians( 50 ), ndip )
+    intensities = generate_random( 1e10, 3e10, ndip )
+    declinations = generate_random( 0, 2*np.pi,1 )
+    for i in range( ndip ):
+        model.add_dipole( rad[ i ], theta[ i ], phi[ i ], intensities[ i ], inclination=0, declination = np.pi/4 )
+
+    model.save('Bodies/'+str(ndip)+'_dip_6000_70_40')
 
     # body = shelve.open('Bodies/50_dip_6000_70_40')['model']
     # #source_components = body.expand(observers)

@@ -6,7 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 mycmap = scm.diverging.Vik_20.mpl_colormap
 
-def plot_mag( data, title, label, show = False, save = True ):
+def plot_mag( data, title, label, show = False, save = True, cmap = mycmap ):
     """
     Plot a Magnetic data on a rectangular latitude x longitude grid.
 
@@ -26,24 +26,25 @@ def plot_mag( data, title, label, show = False, save = True ):
 
     plt.figure()
     plt.title(title, fontsize=20)
-    plt.contourf( data, 50, cmap=mycmap)
-    plt.xticks(np.arange(0, nlongs, nlongs // 12), labels=np.arange(-180, 180, 30))
-    plt.yticks(np.arange(0, nlats, nlats // 6), labels=np.arange(0, 181, 30))
+    plt.contourf( data, 50, cmap=cmap)
+    plt.xticks(np.linspace(0, nlongs-1, 13 ), labels=np.arange(-180, 181, 30))
+    plt.yticks(np.linspace(0, nlats-1, 7), labels=np.arange(0, 181, 30))
     plt.gca().invert_yaxis()
     plt.colorbar(label=label)
     plt.xlabel('Longitude (°)', fontsize=20)
     plt.ylabel('Latitude (°)', fontsize=20)
+    #plt.grid()
     Title = title.split()
     save_title = ''
     for index, word in enumerate( Title ):
         save_title += word
         if index < len( Title ) - 1:
             save_title += '_'
-
     if save == True:
         plt.savefig(save_title+'.png', dpi = 300, bbox_inches = 'tight')
     if show == True:
         plt.show( )
+
 
 def plot_meshgrid( meshgrid, xlims = None, ylims = None, show = True):
     gridx, gridy = meshgrid[ 0 ], meshgrid[ 1 ]
